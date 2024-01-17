@@ -1,0 +1,210 @@
+paths:
+  /api/carts/:
+    get:
+      summary: Obtiene todos los carts
+      tags:
+        - Carts
+      responses:
+        "200":
+          description: Los carritos fueron obtenidos satisfactoriamente de la bbdd
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/Cart'
+        "500":
+          description: Error interno del servidor
+    post:
+      summary: Crea un nuevo cart
+      tags:
+        - Carts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/createCart'
+
+/api/carts/{cid}:
+    put:
+      summary: Actualiza un carts a partir del un carrito entregado por req.body
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Id del cart a actualizar
+        schema:
+          $type: String
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/updateCart'
+    delete:
+      summary: Vaciar un cart a partir del ID (no lo elimina)
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: ID del cart que se desea eliminar
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Cart eliminado exitosamente
+        "500":
+          description: Error interno del servidor
+
+/api/carts/{cid}/products/{pid}:
+    post:
+      summary: Postea un nuevo producto a un cart ambos entregados por params (solo funciona para usuarios autenticados)
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Id del cart a actualizar
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: Id del producto a agregar al carrito
+        schema:
+          type: string
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/postProductOnCart'
+    put:
+      summary: Edito cantidad de un producto de un cart pasado por params
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Id del cart a actualizar
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: Id del producto a agregar al carrito
+        schema:
+          $type: String
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/updateProductsOnCart'
+    delete:
+      summary: Elimino productos del carrito pasado por params
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Id del cart a actualizar
+        schema:
+          $type: String
+      - name: pid
+        in: path
+        required: true
+        description: Id del producto a agregar al carrito
+        schema:
+          $type: String
+      responses:
+        "200":
+          description: Producto del carrito eliminado exitosamente
+        "500":
+          description: Error interno del servidor
+
+
+/api/carts/{cid}/purchase:
+    post:
+      summary: Genera un ticket de venta
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Id del cart que generara el ticket de venta
+        schema:
+          $type: String
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodies/postCartOnTicket'
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id de mongo
+        products:
+          type: array
+          description: productos del carrito
+      example:
+        _id: ObjectId("741dsadas321")
+        products: []
+  requestBodies:
+    createCart:
+      type: object
+      properties:
+        products: 
+          type: array
+          description: array de productos
+      example:
+        products: []
+    updateCart:
+      type: object
+      properties:
+        products:
+          type: array
+          description: Array de productos
+      example:
+        products: [ [product: "656b4f1f53e94ad12d7f961f", quantity:2], [product: "656b4f1f53e94ad12d7f961f", quantity:15]]
+    postProductOnCart:
+        type: object
+        properties:
+          product:
+            type: ObjectId
+            description: Id de mongo del Producto
+        example:
+          _id: ObjectId("741dsadas321")
+    updateProductsOnCart:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quantity:
+                    type: integer
+                    description: Cantidad nueva del producto a editar en el carrito
+          required: true
+          description: Objeto para actualizar la cantidad de un producto en el carrito
+    postCartOnTicket:
+      type: object
+      properties:
+        _id: 
+          type: ObjectId
+          description: Id autogenerado por mongo
+      example:
+        _id: ObjectId("741dsadas321dsaasd8")
